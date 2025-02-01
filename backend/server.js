@@ -10,14 +10,14 @@ app.use(express.json()); // Middleware to parse JSON
 // Use the cors middleware
 app.use(
   cors({
-    origin: "http://localhost:3000", // Allow requests from this origin
+    origin: "http://localhost:5173", // Allow requests from this origin
     methods: ["GET", "POST", "PUT", "DELETE"], // Specify allowed methods
     allowedHeaders: ["Content-Type", "Authorization"], // Specify allowed headers
   })
 );
 
 // API Routes
-app.get("/", (req, res) => res.send("Naama Jeichitom Maaraaaa...!"));
+app.get("/", (req, res) => res.send("Backend is running...🎉🎉🎉🎉"));
 
 // Function to start the server
 const startServer = async () => {
