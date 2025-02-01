@@ -2,6 +2,7 @@ const express = require("express");
 const { Employee, Dependant } = require("../models/Employee");
 const router = express.Router();
 
+
 //POST
 
 // Create a new employee with dependants
@@ -202,6 +203,36 @@ router.delete("/:id", async (req, res) => {
     res
       .status(500)
       .json({ message: "Failed to delete employee and dependants" });
+  }
+});
+
+// GET employee by ID
+router.get("/:id", async (req, res) => {
+  try {
+      const { id } = req.params;
+      
+      const employee = await Employee.findOne({
+          where: { 
+              empId: id  // Using empId instead of id
+          },
+          include: [{
+              model: Employee,
+              as: 'Manager',
+              attributes: ['firstName', 'lastName', 'empId']
+          }]
+      });
+
+      if (!employee) {
+          return res.status(404).json({ message: 'Employee not found' });
+      }
+
+      res.status(200).json(employee);
+  } catch (err) {
+      console.error('Error details:', err);
+      res.status(500).json({ 
+          message: 'Failed to fetch employee details',
+          error: err.message 
+      });
   }
 });
 

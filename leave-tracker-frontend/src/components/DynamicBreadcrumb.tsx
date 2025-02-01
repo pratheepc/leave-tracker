@@ -38,9 +38,11 @@ export function DynamicBreadcrumb() {
                 {isLast ? (
                   <BreadcrumbPage>{formattedName}</BreadcrumbPage>
                 ) : (
-                  <BreadcrumbLink href={routeTo}>{formattedName}</BreadcrumbLink>
+                  <>
+                    <BreadcrumbLink href={routeTo}>{formattedName}</BreadcrumbLink>
+                    <BreadcrumbSeparator />
+                  </>
                 )}
-                {!isLast && <BreadcrumbSeparator />}
               </BreadcrumbItem>
             );
           })}

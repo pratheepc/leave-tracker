@@ -2,6 +2,11 @@ const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/database");
 
 const Employee = sequelize.define("Employee", {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
   empId: {
     type: DataTypes.STRING,
     unique: true,
@@ -125,6 +130,13 @@ const Dependant = sequelize.define("Dependant", {
 });
 
 // Define one-to-many relationship for dependants
+// ... existing model definition ...
+
+Employee.belongsTo(Employee, {
+  foreignKey: 'manager',
+  targetKey: 'empId',
+  as: 'Manager'
+});
 
 Employee.hasMany(Dependant, { foreignKey: "EmployeeId", onDelete: "CASCADE" });
 Dependant.belongsTo(Employee, { foreignKey: "EmployeeId" });

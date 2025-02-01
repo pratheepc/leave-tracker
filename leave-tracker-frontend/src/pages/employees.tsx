@@ -6,24 +6,45 @@ import { Sheet, SheetFooter, SheetContent, SheetDescription, SheetTitle, SheetTr
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
+import { toast } from "@/hooks/use-toast"
+import { ArrowUpRightIcon, MoveUpRightIcon } from "lucide-react"
 
 const BASE_URL = 'http://localhost:5001'
 
 
 
 
-interface Employee {
-    empId: string
-    id: number
-    firstName: string
-    lastName: string
-    personalEmail: string
-    designation: string
-    department: string
-    dateOfJoiningFullTime: string
-    manager: string
-    status: 'ACTIVE' | 'INACTIVE'
+export interface Employee {
+    id: string;
+    empId: string;
+    firstName: string;
+    middleName?: string;
+    lastName: string;
+    dateOfBirth?: string;
+    mobileNumber?: string;
+    personalEmail?: string;
+    bloodGroup?: string;
+    maritalStatus?: string;
+    anniversaryDate?: string;
+    businessUnit?: string;
+    designation?: string;
+    companyEmail?: string;
+    manager?: string;
+    dateOfJoiningFullTime?: string;
+    dateOfJoiningInternship?: string;
+    relievingDate?: string;
+    permanentAddress?: string;
+    correspondenceAddress?: string;
+    bankName?: string;
+    nameAsOnBankAccount?: string;
+    accountNumber?: string;
+    ifscCode?: string;
+    panNumber?: string;
+    aadhaarNumber?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    department?: string;
+    status?: 'ACTIVE' | 'INACTIVE';
 }
 
 
@@ -35,8 +56,6 @@ export default function EmployeesPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [searchTerm, setSearchTerm] = useState('')
-    // const [sortField, setSortField] = useState<keyof Employee>('firstName')
-    // const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
     const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL')
 
     const fetchEmployees = async () => {
@@ -51,7 +70,13 @@ export default function EmployeesPage() {
             setFilteredEmployees(data); // Initialize filtered employees with all employees
         } catch (error) {
             console.error('Error fetching employees:', error);
-            setError('Failed to fetch employees. Please try again.');
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to fetch employees. Please try again.",
+                duration: 3000,
+            });
+
         } finally {
             setIsLoading(false);
         }
@@ -64,7 +89,6 @@ export default function EmployeesPage() {
     useEffect(() => {
         if (employees.length > 0) {
             let result = [...employees]
-            console.log(result)
 
             // Apply search filter
             if (searchTerm) {
@@ -72,8 +96,8 @@ export default function EmployeesPage() {
                     employee.empId.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     employee.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     employee.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    employee.personalEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    employee.designation.toLowerCase().includes(searchTerm.toLowerCase())
+                    employee.personalEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    employee.designation?.toLowerCase().includes(searchTerm.toLowerCase())
                 )
             }
 
@@ -99,6 +123,9 @@ export default function EmployeesPage() {
 
 
     //UI
+    // ... existing code ...
+
+
     return (
         <div className="p-6 space-y-6">
             <div className="flex justify-between items-center">
@@ -331,9 +358,9 @@ export default function EmployeesPage() {
                                         case "name-desc":
                                             return b.firstName.localeCompare(a.firstName);
                                         case "date-asc":
-                                            return new Date(a.dateOfJoiningFullTime).getTime() - new Date(b.dateOfJoiningFullTime).getTime();
+                                            return new Date(a.dateOfJoiningFullTime || '').getTime() - new Date(b.dateOfJoiningFullTime || '').getTime();
                                         case "date-desc":
-                                            return new Date(b.dateOfJoiningFullTime).getTime() - new Date(a.dateOfJoiningFullTime).getTime();
+                                            return new Date(b.dateOfJoiningFullTime || '').getTime() - new Date(a.dateOfJoiningFullTime || '').getTime();
                                         case "empId-asc":
                                             return a.empId.localeCompare(b.empId);
                                         case "empId-desc":
@@ -383,13 +410,16 @@ export default function EmployeesPage() {
                                 <TableHead>Position</TableHead>
                                 <TableHead>Reporting Manager</TableHead>
                                 <TableHead>Joining Date</TableHead>
-                                <TableHead>Status</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {filteredEmployees && filteredEmployees.length > 0 ? (
                                 filteredEmployees.map((employee) => (
-                                    <TableRow key={employee.empId}>
+                                    <TableRow
+                                        key={employee.empId}
+                                        className="cursor-pointer hover:bg-gray-100"
+                                        onClick={() => window.location.href = `/employees/${employee.empId}`}
+                                    >
                                         <TableCell>{employee.empId}</TableCell>
                                         <TableCell>{employee.firstName} {employee.lastName}</TableCell>
                                         <TableCell>{employee.personalEmail}</TableCell>
@@ -397,9 +427,12 @@ export default function EmployeesPage() {
                                         <TableCell>
                                             {employees.find(e => e.empId === employee.manager)?.firstName || 'No Manager'}
                                         </TableCell>
-                                        <TableCell>{new Date(employee.dateOfJoiningFullTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</TableCell>
-                                        <TableCell>{employee.status}</TableCell>
+                                        <TableCell>{employee.dateOfJoiningFullTime ? new Date(employee.dateOfJoiningFullTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}</TableCell>
+                                        <TableCell>
+                                            <ArrowUpRightIcon className="w-8 h-8 text-gray-400" />
+                                        </TableCell>
                                     </TableRow>
+
                                 ))
                             ) : (
                                 <TableRow>
@@ -416,16 +449,3 @@ export default function EmployeesPage() {
     )
 }
 
-function setIsLoading(arg0: boolean) {
-    throw new Error("Function not implemented.")
-}
-
-
-function setFilteredEmployees(data: any) {
-    throw new Error("Function not implemented.")
-}
-
-
-function setError(arg0: string) {
-    throw new Error("Function not implemented.")
-}
