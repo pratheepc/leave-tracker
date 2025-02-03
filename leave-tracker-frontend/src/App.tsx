@@ -35,13 +35,15 @@ function App() {
             </header>
 
             <DynamicBreadcrumb />
+            
             {/* main content */}
             <Routes>
               <Route path="/" element={<WorkInProgress />} />
               <Route path="/dashboard" element={<WorkInProgress />} />
               <Route path="/employees" element={<EmployeesPage />} />
-              <Route path="/employees/:id" element={<EmployeeDetailsPage />} />
+              <Route path="/employees/:empId" element={<EmployeeDetailsPage />} />
             </Routes>
+
           </SidebarInset>
         </SidebarProvider>
       </div>

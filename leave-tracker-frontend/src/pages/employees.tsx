@@ -7,9 +7,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/hooks/use-toast"
-import { ArrowUpRightIcon, MoveUpRightIcon } from "lucide-react"
-
-const BASE_URL = 'http://localhost:5001'
+import { ArrowUpRightIcon } from "lucide-react"
+import { BASE_URL } from "@/main"
 
 
 
@@ -61,7 +60,7 @@ export default function EmployeesPage() {
     const fetchEmployees = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch(`${BASE_URL}/api/employees`);
+            const response = await fetch(`${BASE_URL}/employees`);
             if (!response.ok) {
                 throw new Error('Failed to fetch employees');
             }

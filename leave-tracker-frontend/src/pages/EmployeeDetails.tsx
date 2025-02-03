@@ -3,35 +3,49 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { BriefcaseIcon, PhoneIcon, HomeIcon, CreditCardIcon, UserIcon } from "lucide-react";
+import { BriefcaseIcon, PhoneIcon, HomeIcon, CreditCardIcon, UserIcon, ChevronLeftIcon } from "lucide-react";
 import { Employee } from './employees';
 import { toast } from '@/hooks/use-toast';
+import { BASE_URL } from '@/main';
 
-const BASE_URL = 'http://localhost:5001'
+
 
 const EmployeeDetails = () => {
     const navigate = useNavigate();
     const { empId } = useParams();
     const [employee, setEmployee] = useState<Employee | null>(null);
     const [loading, setLoading] = useState(true);
-
+    const [error, setError] = useState<string | null>(null);
     useEffect(() => {
         const fetchEmployee = async () => {
             if (!empId) return;
             try {
-                const response = await fetch(`${BASE_URL}/api/employees/${empId}`);
+                console.log('Fetching from:', `${BASE_URL}/employees/${empId}`);
+                const response = await fetch(`${BASE_URL}/employees/${empId}`);
                 if (!response.ok) {
+                    const errorData = await response.text();
+                    console.error('API Error:', errorData);
                     toast({
                         variant: "destructive",
                         title: "Error",
                         description: "Failed to fetch employee details",
                         duration: 3000
                     });
+                    throw new Error(errorData);
                 }
+
                 const data = await response.json();
+                console.log('Employee data:', data);
                 setEmployee(data);
             } catch (error) {
                 console.error('Error fetching employee:', error);
+                setError(error instanceof Error ? error.message : 'Failed to fetch employee details');
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: 'Failed to fetch employee details',
+                    duration: 3000
+                });
             } finally {
                 setLoading(false);
             }
@@ -40,13 +54,17 @@ const EmployeeDetails = () => {
         fetchEmployee();
     }, [empId]);
 
-    const formatDate = (date: string | undefined) => {
-        if (!date) return 'Not specified';
-        return format(new Date(date), 'dd MMM yyyy');
-    };
+    console.log({
+        empId,
+        loading,
+        employee,
+        error,
+        apiUrl: `${BASE_URL}/employees/${empId}`
+    });
 
-    console.log('🎉 Current employee state:', employee);
-    console.log('🎉 Loading state:', loading);
+    if (error) {
+        return <div>Error: {error}</div>;
+    }
 
     if (loading) {
         return (
@@ -62,25 +80,26 @@ const EmployeeDetails = () => {
     }
 
     if (!employee) {
-        return (
-            <div className="container mx-auto p-6">
-                <Card>
-                    <CardContent className="flex items-center justify-center h-32">
-                        <p className="text-muted-foreground">Employee not found</p>
-                    </CardContent>
-                </Card>
-            </div>
-        );
+        return <div>No employee data found</div>;
     }
 
+
+
+    const formatDate = (date: string | undefined) => {
+        if (!date) return 'Not specified';
+        return format(new Date(date), 'dd MMM yyyy');
+    };
+
+
+
     return (
-        <div className="container mx-auto p-6 space-y-6">
-            <div className="flex items-center space-x-4">
+        <div className="container p-4 space-y-6">
+            <div className="flex items-center space-x-2">
                 <button
                     onClick={() => navigate(-1)}
                     className="text-sm text-muted-foreground hover:text-primary"
                 >
-                    ← Back
+                    <ChevronLeftIcon className="h-8 w-8" />
                 </button>
                 <h1 className="text-3xl font-bold">Employee Profile</h1>
             </div>
