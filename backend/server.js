@@ -56,7 +56,9 @@ sequelize
 
 //Registering employeeRoutes to server.js
 
+
+
 app.use("/api/employees", employeeRoutes); // Register employee routes
-app.get("/", (req, res) => res.send("API is running"));
+
 
 startServer(); // Initialize the server

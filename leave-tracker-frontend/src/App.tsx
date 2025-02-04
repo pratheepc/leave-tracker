@@ -12,6 +12,7 @@ import { Toaster } from "./components/ui/toaster"
 import EmployeesPage from "./pages/employees"
 import WorkInProgress from "./pages/dashboard"
 import EmployeeDetailsPage from "./pages/EmployeeDetails"
+import CreateEmployee from "./pages/CreateEmployee"
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -35,13 +36,14 @@ function App() {
             </header>
 
             <DynamicBreadcrumb />
-            
+
             {/* main content */}
             <Routes>
               <Route path="/" element={<WorkInProgress />} />
               <Route path="/dashboard" element={<WorkInProgress />} />
               <Route path="/employees" element={<EmployeesPage />} />
               <Route path="/employees/:empId" element={<EmployeeDetailsPage />} />
+              <Route path="/create-employee" element={<CreateEmployee />} />
             </Routes>
 
           </SidebarInset>

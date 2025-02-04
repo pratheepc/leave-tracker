@@ -38,32 +38,16 @@ router.post("/", async (req, res) => {
     } = req.body;
 
     // Create employee record
+    const maxIdRecord = await Employee.findOne({
+      order: [['id', 'DESC']]
+    });
+    
+    const nextId = maxIdRecord ? maxIdRecord.id + 1 : 1;
+
+    // Create employee record with the next available ID
     const employee = await Employee.create({
-      empId,
-      firstName,
-      middleName,
-      lastName,
-      businessUnit,
-      dateOfJoiningFullTime,
-      dateOfJoiningInternship,
-      relievingDate,
-      designation,
-      dateOfBirth,
-      mobileNumber,
-      personalEmail,
-      companyEmail,
-      permanentAddress,
-      correspondenceAddress,
-      bloodGroup,
-      maritalStatus,
-      anniversaryDate,
-      bankName,
-      nameAsOnBankAccount,
-      accountNumber,
-      ifscCode,
-      panNumber,
-      aadhaarNumber,
-      manager,
+      id: nextId,  // Explicitly set the ID
+      ...req.body
     });
 
     // Add dependants if provided
@@ -77,8 +61,40 @@ router.post("/", async (req, res) => {
       .status(201)
       .json({ message: "Employee created successfully", employee });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ message: "Failed to create employee" });
+    console.error('Detailed error:', {
+      name: err.name,
+      message: err.message,
+      errors: err.errors?.map(e => ({
+        field: e.path,
+        message: e.message,
+        value: e.value
+      }))
+    });
+
+    if (err.name === 'SequelizeUniqueConstraintError') {
+      return res.status(400).json({
+        message: "Employee ID already exists",
+        errors: err.errors.map(e => ({
+          field: e.path,
+          message: "This ID is already taken. Please use a different ID."
+        }))
+      });
+    }
+
+    if (err.name === 'SequelizeValidationError') {
+      return res.status(400).json({
+        message: "Validation error",
+        errors: err.errors.map(e => ({
+          field: e.path,
+          message: e.message
+        }))
+      });
+    }
+
+    res.status(500).json({ 
+      message: "Failed to create employee",
+      error: err.message 
+    });
   }
 });
 
