@@ -252,4 +252,25 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// Add this route alongside your other employee routes
+router.patch('/:empId', async (req, res) => {
+    try {
+        const { empId } = req.params;
+        const { relievingDate } = req.body;
+        
+        const employee = await Employee.findOne({ where: { empId } });
+        if (!employee) {
+            return res.status(404).json({ message: 'Employee not found' });
+        }
+
+        await employee.update({ relievingDate });
+        
+        const updatedEmployee = await employee.reload();
+        res.json(updatedEmployee);
+    } catch (error) {
+        console.error('Error updating employee:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 module.exports = router;

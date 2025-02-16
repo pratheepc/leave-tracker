@@ -40,6 +40,12 @@ const Employee = sequelize.define("Employee", {
     type: DataTypes.DATE,
     allowNull: true,
   },
+  status: {
+    type: DataTypes.VIRTUAL,
+    get() {
+      return this.relievingDate ? 'Relieved' : 'Active';
+    }
+  },
   designation: {
     type: DataTypes.STRING,
     allowNull: true,

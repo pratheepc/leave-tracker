@@ -11,7 +11,7 @@ app.use(express.json()); // Middleware to parse JSON
 app.use(
   cors({
     origin: "http://localhost:5173", // Allow requests from this origin
-    methods: ["GET", "POST", "PUT", "DELETE"], // Specify allowed methods
+    methods: ["GET", "POST", "PUT", "DELETE","PATCH"], // Specify allowed methods
     allowedHeaders: ["Content-Type", "Authorization"], // Specify allowed headers
   })
 );

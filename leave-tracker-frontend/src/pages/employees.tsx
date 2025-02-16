@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/hooks/use-toast"
-import { ArrowUpRightIcon } from "lucide-react"
+import { ArrowUpRightIcon, PencilIcon } from "lucide-react"
 import { BASE_URL } from "@/main"
 import { useNavigate } from "react-router-dom"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 
 
@@ -42,7 +43,7 @@ export interface Employee {
     createdAt?: string;
     updatedAt?: string;
     department?: string;
-    status?: 'ACTIVE' | 'INACTIVE';
+    status?: 'Active' | 'Relieved';
 }
 
 
@@ -54,9 +55,8 @@ export default function EmployeesPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [error] = useState<string | null>(null)
     const [searchTerm, setSearchTerm] = useState('')
-    const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL')
     const navigate = useNavigate();
-    
+
     const fetchEmployees = async () => {
         setIsLoading(true);
         try {
@@ -100,14 +100,9 @@ export default function EmployeesPage() {
                 )
             }
 
-            // Apply status filter
-            if (statusFilter !== 'ALL') {
-                result = result.filter(employee => employee.status === statusFilter)
-            }
-
             setFilteredEmployees(result)
         }
-    }, [employees, searchTerm, statusFilter])
+    }, [employees, searchTerm])
 
 
     // Update the search input handler
@@ -115,20 +110,14 @@ export default function EmployeesPage() {
         setSearchTerm(e.target.value)
     }
 
-    // Update the status filter handler
-    const handleStatusFilter = (value: string) => {
-        setStatusFilter(value as 'ALL' | 'ACTIVE' | 'INACTIVE')
-    }
-
 
     //UI
-    // ... existing code ...
 
 
     return (
         <div className="p-6 space-y-6">
             <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold tracking-tight">Employee Management</h1>
+                <h1 className="text-3xl font-bold tracking-tight dark:text-white">Employee Management</h1>
                 <Button onClick={() => navigate('/create-employee')}>Add Employee</Button>
             </div>
 
@@ -204,65 +193,130 @@ export default function EmployeesPage() {
 
                                 </SelectContent>
                             </Select>
-
-                            {/* Filter by Status */}
-                            <Select onValueChange={handleStatusFilter}>
-                                <SelectTrigger className="w-[180px]">
-                                    <SelectValue placeholder="Filter by status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="ALL">All</SelectItem>
-                                    <SelectItem value="ACTIVE">Active</SelectItem>
-                                    <SelectItem value="INACTIVE">Inactive</SelectItem>
-                                </SelectContent>
-                            </Select>
                         </div>
                     </div>
                 </CardContent>
 
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Employee ID</TableHead>
-                                <TableHead>First Name</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Position</TableHead>
-                                <TableHead>Reporting Manager</TableHead>
-                                <TableHead>Joining Date</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredEmployees && filteredEmployees.length > 0 ? (
-                                filteredEmployees.map((employee) => (
-                                    <TableRow
-                                        key={employee.empId}
-                                        className="cursor-pointer hover:bg-gray-100"
-                                        onClick={() => window.location.href = `/employees/${employee.empId}`}
-                                    >
-                                        <TableCell>{employee.empId}</TableCell>
-                                        <TableCell>{employee.firstName} {employee.lastName}</TableCell>
-                                        <TableCell>{employee.personalEmail}</TableCell>
-                                        <TableCell>{employee.designation}</TableCell>
-                                        <TableCell>
-                                            {employees.find(e => e.empId === employee.manager)?.firstName || 'No Manager'}
-                                        </TableCell>
-                                        <TableCell>{employee.dateOfJoiningFullTime ? new Date(employee.dateOfJoiningFullTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}</TableCell>
-                                        <TableCell>
-                                            <ArrowUpRightIcon className="w-8 h-8 text-gray-400" />
-                                        </TableCell>
-                                    </TableRow>
+                    <Tabs defaultValue="active" className="w-full">
+                        <TabsList className="mb-4">
+                            <TabsTrigger value="active">Active Employees</TabsTrigger>
+                            <TabsTrigger value="relieved">Relieved Employees</TabsTrigger>
+                        </TabsList>
 
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={8} className="text-center">
-                                        {isLoading ? 'Loading...' : 'No employees found'}
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                        <TabsContent value="active">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Employee ID</TableHead>
+                                        <TableHead>First Name</TableHead>
+                                        <TableHead>Email</TableHead>
+                                        <TableHead>Position</TableHead>
+                                        <TableHead>Reporting Manager</TableHead>
+                                        <TableHead>Joining Date</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {filteredEmployees && filteredEmployees.filter(emp => emp.status === 'Active').length > 0 ? (
+                                        filteredEmployees
+                                            .filter(emp => emp.status === 'Active')
+                                            .map((employee) => (
+                                                <TableRow
+                                                    key={employee.empId}
+                                                    className="cursor-pointer hover:bg-gray-100"
+                                                    onClick={() => window.location.href = `/employees/${employee.empId}`}
+                                                >
+                                                    <TableCell>{employee.empId}</TableCell>
+                                                    <TableCell>{employee.firstName} {employee.lastName}</TableCell>
+                                                    <TableCell>{employee.personalEmail}</TableCell>
+                                                    <TableCell>{employee.designation}</TableCell>
+                                                    <TableCell>
+                                                        {employees.find(e => e.empId === employee.manager)?.firstName || 'No Manager'}
+                                                    </TableCell>
+                                                    <TableCell>{employee.dateOfJoiningFullTime ? new Date(employee.dateOfJoiningFullTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}</TableCell>
+                                                    <TableCell>
+                                                        <div className="flex gap-2">
+                                                            <Button
+                                                                variant="outline"
+                                                                size="icon"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    navigate(`/employees/${employee.empId}/edit`);
+                                                                }}
+                                                            >
+                                                                <PencilIcon className="h-4 w-4" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="outline"
+                                                                size="icon"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    navigate(`/employees/${employee.empId}`);
+                                                                }}
+                                                            >
+                                                                <ArrowUpRightIcon className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={8} className="text-center">
+                                                {isLoading ? 'Loading...' : 'No active employees found'}
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </TabsContent>
+
+                        <TabsContent value="relieved">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Employee ID</TableHead>
+                                        <TableHead>First Name</TableHead>
+                                        <TableHead>Email</TableHead>
+                                        <TableHead>Position</TableHead>
+                                        <TableHead>Reporting Manager</TableHead>
+                                        <TableHead>Relieving Date</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {filteredEmployees && filteredEmployees.filter(emp => emp.status === 'Relieved').length > 0 ? (
+                                        filteredEmployees
+                                            .filter(emp => emp.status === 'Relieved')
+                                            .map((employee) => (
+                                                <TableRow
+                                                    key={employee.empId}
+                                                    className="cursor-pointer hover:bg-gray-100"
+                                                    onClick={() => window.location.href = `/employees/${employee.empId}`}
+                                                >
+                                                    <TableCell>{employee.empId}</TableCell>
+                                                    <TableCell>{employee.firstName} {employee.lastName}</TableCell>
+                                                    <TableCell>{employee.personalEmail}</TableCell>
+                                                    <TableCell>{employee.designation}</TableCell>
+                                                    <TableCell>
+                                                        {employees.find(e => e.empId === employee.manager)?.firstName || 'No Manager'}
+                                                    </TableCell>
+                                                    <TableCell>{employee.relievingDate ? new Date(employee.relievingDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}</TableCell>
+                                                    <TableCell>
+                                                        <ArrowUpRightIcon className="w-8 h-8 text-gray-400" />
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={8} className="text-center">
+                                                {isLoading ? 'Loading...' : 'No relieved employees found'}
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </TabsContent>
+                    </Tabs>
                 </CardContent>
             </Card>
         </div>
