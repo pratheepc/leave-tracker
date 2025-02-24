@@ -131,26 +131,47 @@ export function EmployeeDetailsForm({ isEditing = false, initialData, empId }: E
 
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
         try {
-            const response = await fetch(`${BASE_URL}/employees${isEditing ? `/${initialData?.empId}` : ''}`, {
-                method: isEditing ? 'PUT' : 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+            const formattedData = {
+                ...data,
+                empId: data.empId || initialData?.empId,
+                manager: data.manager || null,
+                dateOfBirth: data.dateOfBirth || null,
+                dateOfJoiningFullTime: data.dateOfJoiningFullTime || null,
+                dateOfJoiningInternship: data.dateOfJoiningInternship || null,
+                anniversaryDate: data.anniversaryDate || null
+            };
+
+            const url = `${BASE_URL}/employees/${initialData?.empId}`;
+            console.log('Making request to:', url);
+            console.log('Method:', 'PUT');
+            console.log('Data being sent:', formattedData);
+
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formattedData)
             });
 
+            const responseData = await response.json();
+            console.log('Response:', responseData);
+
             if (!response.ok) {
-                throw new Error('Failed to save employee');
+                throw new Error(responseData.message || 'Failed to save employee');
             }
 
             toast({
-                title: isEditing ? "Employee Updated" : "Employee Created",
-                description: isEditing ? "Employee details have been updated successfully." : "New employee has been created successfully.",
+                title: "Success",
+                description: "Employee updated successfully",
             });
 
-            navigate('/employees');
+            window.location.href = '/employees';
         } catch (error) {
+            console.error('Error saving employee:', error);
             toast({
                 title: "Error",
-                description: `Failed to ${isEditing ? 'update' : 'create'} employee`,
+                description: "Failed to update employee",
                 variant: "destructive",
             });
         }
@@ -302,7 +323,7 @@ export function EmployeeDetailsForm({ isEditing = false, initialData, empId }: E
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="manager" className="text-slate-400">Manager *</Label>
+                                <Label htmlFor="manager" className="text-slate-400">Manager</Label>
                                 <Popover open={open} onOpenChange={setOpen}>
                                     <PopoverTrigger asChild>
                                         <Button

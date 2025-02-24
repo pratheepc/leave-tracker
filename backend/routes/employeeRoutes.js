@@ -118,82 +118,33 @@ router.get("/", async (req, res) => {
 
 //PUT
 
-router.put("/:id", async (req, res) => {
+router.put("/:empId", async (req, res) => {
   try {
-    const { id } = req.params;
-    const {
-      firstName,
-      middleName,
-      lastName,
-      businessUnit,
-      dateOfJoiningFullTime,
-      dateOfJoiningInternship,
-      relievingDate,
-      designation,
-      dateOfBirth,
-      mobileNumber,
-      personalEmail,
-      companyEmail,
-      permanentAddress,
-      correspondenceAddress,
-      bloodGroup,
-      maritalStatus,
-      anniversaryDate,
-      bankName,
-      nameAsOnBankAccount,
-      accountNumber,
-      ifscCode,
-      panNumber,
-      aadhaarNumber,
-      manager,
-      dependants,
-    } = req.body;
+    const { empId } = req.params;
+    console.log('Updating employee with empId:', empId);
+    console.log('Request body:', req.body);
 
-    // Update the employee
-    const employee = await Employee.findByPk(id);
+    const employee = await Employee.findOne({ 
+      where: { empId: empId }
+    });
+    
     if (!employee) {
+      console.log('Employee not found with empId:', empId);
       return res.status(404).json({ message: "Employee not found" });
     }
 
-    await employee.update({
-      firstName,
-      middleName,
-      lastName,
-      businessUnit,
-      dateOfJoiningFullTime,
-      dateOfJoiningInternship,
-      relievingDate,
-      designation,
-      dateOfBirth,
-      mobileNumber,
-      personalEmail,
-      companyEmail,
-      permanentAddress,
-      correspondenceAddress,
-      bloodGroup,
-      maritalStatus,
-      anniversaryDate,
-      bankName,
-      nameAsOnBankAccount,
-      accountNumber,
-      ifscCode,
-      panNumber,
-      aadhaarNumber,
-      manager,
-    });
+    console.log('Found employee:', employee.toJSON());
 
-    // Update dependants
-    if (dependants && Array.isArray(dependants)) {
-      await Dependant.destroy({ where: { EmployeeId: employee.id } }); // Remove old dependants
-      for (const dependant of dependants) {
-        await Dependant.create({ ...dependant, EmployeeId: employee.id });
-      }
-    }
+    await employee.update(req.body);
+    console.log('Employee updated successfully');
 
     res.status(200).json({ message: "Employee updated successfully" });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ message: "Failed to update employee" });
+    console.error('Error updating employee:', err);
+    res.status(500).json({ 
+      message: "Failed to update employee",
+      error: err.message 
+    });
   }
 });
 

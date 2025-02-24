@@ -24,7 +24,7 @@ export const formSchema = z.object({
     ifscCode: z.string().min(1, "IFSC code is required"),
     panNumber: z.string().min(1, "PAN number is required"),
     aadhaarNumber: z.string().min(1, "Aadhaar number is required"),
-    manager: z.string().optional(),
+    manager: z.string().nullable().optional(),
     dependants: z.array(z.object({
         name: z.string(),
         relationship: z.string(),
